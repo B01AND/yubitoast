@@ -1,6 +1,6 @@
 module github.com/rubensayshi/yubitoast
 
-go 1.12
+go 1.16
 
 require (
 	github.com/deckarep/gosx-notifier v0.0.0-20180201035817-e127226297fb // indirect

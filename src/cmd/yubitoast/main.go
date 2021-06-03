@@ -3,15 +3,23 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"os/exec"
+	"path"
 	"regexp"
 	"runtime"
-	"os/exec"
-
-	"github.com/pkg/errors"
 
 	"github.com/hpcloud/tail"
 	"github.com/martinlindhe/notify"
+	"github.com/pkg/errors"
+
+	_ "embed"
 )
+
+//go:embed gnupg.png
+var icon []byte
+var iconPath string
 
 var pkAuthRegexp = regexp.MustCompile("PKAUTH OPENPGP\\.3$")
 var pkSignRegexp = regexp.MustCompile("PKSIGN --hash=.+ OPENPGP\\.1$")
@@ -24,6 +32,14 @@ const popupTimeout = 10 // seconds
 
 func main() {
 	flag.Parse()
+
+	// create tmpfile holding the icon
+	tmpDir := os.TempDir()
+	iconPath = path.Join(tmpDir, "yubitoast-icon.png")
+	err := ioutil.WriteFile(iconPath, icon, 0600)
+	if err != nil {
+		fmt.Printf("Failed to create icon in tmpdir: %v \n", err)
+	}
 
 	t, err := tail.TailFile(*fLogfile, tail.Config{
 		Follow: true,
@@ -73,7 +89,6 @@ func showNotification(msg string, usePopup bool) {
 			fmt.Println(errors.Wrapf(err, "osascript").Error())
 		}
 	default:
-		notify.Notify("Yubikey Touch Requested", "", msg, "gnupg.png")
-		notify.Notify(appName, "", msg, "gnupg.png")
+		notify.Notify(appName, appName, msg, iconPath)
 	}
 }
