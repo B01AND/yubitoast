@@ -3,10 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
-	"path"
 	"regexp"
 	"runtime"
 
@@ -34,9 +32,12 @@ func main() {
 	flag.Parse()
 
 	// create tmpfile holding the icon
-	tmpDir := os.TempDir()
-	iconPath = path.Join(tmpDir, "yubitoast-icon.png")
-	err := ioutil.WriteFile(iconPath, icon, 0600)
+	iconFile, err := os.CreateTemp(os.TempDir(), "yubitoast-icon-*.png")
+	if err != nil {
+		fmt.Printf("Failed to create icon in tmpdir: %v \n", err)
+	}
+	_, err = iconFile.Write(icon)
+	//err := ioutil.WriteFile(, icon, 0600)
 	if err != nil {
 		fmt.Printf("Failed to create icon in tmpdir: %v \n", err)
 	}
